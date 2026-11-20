@@ -3,7 +3,7 @@ package com.example.nocrystal;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.client.KeyMapping;
@@ -24,12 +24,8 @@ import java.util.UUID;
 
 public class NoCrystalAfterKillClient implements ClientModInitializer {
 
-    // ====== الإعدادات (غيّرها براحتك) ======
-    /** مدة القفل بعد القتل بالـ ticks (20 tick = ثانية). 60 = 3 ثواني */
     private static final int LOCK_DURATION_TICKS = 60;
-    /** أقصى مسافة لموت لاعب عشان يتحسب قتل (بالبلوكات) */
     private static final double KILL_RANGE = 16.0;
-    // =======================================
 
     private static boolean enabled = true;
     private static int lockTicks = 0;
@@ -56,7 +52,7 @@ public class NoCrystalAfterKillClient implements ClientModInitializer {
         KeyMapping.Category category = KeyMapping.Category.register(
                 Identifier.fromNamespaceAndPath("nocrystalafterkill", "main"));
 
-        toggleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+        toggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.nocrystalafterkill.toggle",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_K,
@@ -85,7 +81,6 @@ public class NoCrystalAfterKillClient implements ClientModInitializer {
 
             if (!enabled) return;
 
-            // كشف موت اللاعبين القريبين
             for (Player p : client.level.players()) {
                 if (p == client.player) continue;
                 boolean dead = p.isDeadOrDying() || p.getHealth() <= 0.0f;
@@ -101,7 +96,6 @@ public class NoCrystalAfterKillClient implements ClientModInitializer {
             }
         });
 
-        // منع ضرب الكريستال
         AttackEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> {
             if (isLocalPlayer(player) && isLocked() && entity instanceof EndCrystal) {
                 return InteractionResult.FAIL;
@@ -109,7 +103,6 @@ public class NoCrystalAfterKillClient implements ClientModInitializer {
             return InteractionResult.PASS;
         });
 
-        // منع تركيب الكريستال / الأنكر وتفجير أو شحن الأنكر
         UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
             if (!isLocalPlayer(player) || !isLocked()) return InteractionResult.PASS;
 
