@@ -123,7 +123,7 @@ public class NoCrystalAfterKillClient implements ClientModInitializer {
                 } else {
                     countedDeaths.remove(p.getUUID());
                     if (inRange) {
-                        String name = p.getName().getString();
+                        String name = p.getScoreboardName();
                         nowNear.put(p.getUUID(), name);
                         recentNear.put(name, tick);
                     }
@@ -152,4 +152,4 @@ public class NoCrystalAfterKillClient implements ClientModInitializer {
             Object[] args = tc.getArgs();
             if (args.length == 0) return;
 
-            String me = mc.player.getName().getString();
+            String me = mc.player.getScoreboardName();
