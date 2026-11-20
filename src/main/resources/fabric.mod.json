@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "nocrystalafterkill",
+  "version": "${version}",
+  "name": "No Crystal After Kill",
+  "description": "After you kill a player, crystals and anchors are locked for a few seconds so you don't pop your own totem. Toggle with a keybind.",
+  "authors": ["You"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.example.nocrystal.NoCrystalAfterKillClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
