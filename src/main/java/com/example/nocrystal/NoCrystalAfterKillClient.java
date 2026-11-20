@@ -130,7 +130,6 @@ public class NoCrystalAfterKillClient implements ClientModInitializer {
                 }
             }
 
-            // لاعب كان جنبك واختفى تماماً بعد ما استخدمت كريستال/أنكر
             for (UUID id : nearPrev.keySet()) {
                 if (!nowNear.containsKey(id)
                         && client.level.getPlayerByUUID(id) == null
@@ -141,7 +140,6 @@ public class NoCrystalAfterKillClient implements ClientModInitializer {
             nearPrev = nowNear;
         });
 
-        // كشف من رسالة الموت في الشات
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (overlay || !enabled) return;
             Minecraft mc = Minecraft.getInstance();
@@ -153,3 +151,41 @@ public class NoCrystalAfterKillClient implements ClientModInitializer {
             if (args.length == 0) return;
 
             String me = mc.player.getScoreboardName();
+            String victim = argToString(args[0]);
+            if (victim.equals(me)) return;
+
+            boolean iAmKiller = false;
+            for (int i = 1; i < args.length; i++) {
+                if (argToString(args[i]).equals(me)) iAmKiller = true;
+            }
+            Integer seen = recentNear.get(victim);
+            boolean wasNear = seen != null && tick - seen <= 100;
+
+            if (iAmKiller || wasNear) {
+                mc.execute(() -> trigger("chat"));
+            }
+        });
+
+        AttackEntityCallback.EVENT.register((player, level, hand, entity, hitResult) -> {
+            if (isLocalPlayer(player) && entity instanceof EndCrystal) {
+                lastActionTick = tick;
+                if (isLocked()) return InteractionResult.FAIL;
+            }
+            return InteractionResult.PASS;
+        });
+
+        UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
+            if (!isLocalPlayer(player)) return InteractionResult.PASS;
+
+            ItemStack held = player.getItemInHand(hand);
+            boolean relevant = held.is(Items.END_CRYSTAL)
+                    || held.is(Items.RESPAWN_ANCHOR)
+                    || level.getBlockState(hitResult.getBlockPos()).is(Blocks.RESPAWN_ANCHOR);
+            if (!relevant) return InteractionResult.PASS;
+
+            lastActionTick = tick;
+            if (isLocked()) return InteractionResult.FAIL;
+            return InteractionResult.PASS;
+        });
+    }
+}
